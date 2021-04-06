@@ -1,25 +1,34 @@
 # base-image for python on any machine using a template variable,
 # see more about dockerfile templates here: https://www.balena.io/docs/learn/develop/dockerfile/
-FROM balenalib/%%BALENA_MACHINE_NAME%%-python:3-stretch-run
+FROM balenalib/%%BALENA_MACHINE_NAME%%-alpine-python:3.9-3.12-run
 
 # use `install_packages` if you need to install dependencies,
-# for instance if you need git, just uncomment the line below.
-# RUN install_packages git
+RUN install_packages openrc eudev 
+RUN mkdir -p /run/openrc ; touch /run/openrc/softlevel
+RUN install_packages alpine-conf libx11-dev libxft-dev libxinerama-dev  ttf-dejavu xf86-video-fbdev
+RUN [ "sh", "-c", "setup-xorg-base xf86-video-fbdev openbox slim dbus-x11 setxkbmap | tee "]
+RUN install_packages xinit xterm 
+RUN install_packages awesome feh lxterminal
+RUN install_packages fuse gvfs gvfs-mtp gvfs-lang gvfs-archive gvfs-fuse gvfs-gphoto2
+RUN rc-update add dbus
+RUN rc-update add fuse
+
+RUN install_packages tftp-hpa libx11-dev libxft-dev libxinerama-dev wireshark
 
 # Set our working directory
-WORKDIR /usr/src/app
-
-# Copy requirements.txt first for better cache on later pushes
-COPY requirements.txt requirements.txt
-
-# pip install python deps from requirements.txt on the resin.io build server
-RUN pip install -r requirements.txt
+WORKDIR /root
 
 # This will copy all files in our root to the working  directory in the container
-COPY . ./
+RUN mkdir -p ~/.config/openbox
+COPY src/startup.sh ~/.config/openbox 
 
 # Enable udevd so that plugged dynamic hardware devices show up in our container.
 ENV UDEV=1
 
-# main.py will run when container starts up on the device
-CMD ["python","-u","src/main.py"]
+# Allow the TFTP port to be opened to the world
+EXPOSE 69/udp
+
+# Start an X session with the openbox window manager
+# openbox will invoke startup.sh which will start up the TFTP server
+CMD xinit openbox 
+
