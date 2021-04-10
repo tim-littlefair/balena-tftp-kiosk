@@ -5,30 +5,33 @@ FROM balenalib/%%BALENA_MACHINE_NAME%%-alpine-python:3.9-3.12-run
 # use `install_packages` if you need to install dependencies,
 RUN install_packages openrc eudev 
 RUN mkdir -p /run/openrc ; touch /run/openrc/softlevel
-RUN install_packages alpine-conf libx11-dev libxft-dev libxinerama-dev  ttf-dejavu xf86-video-fbdev
+RUN install_packages alpine-conf libx11-dev libxft-dev libxinerama-dev  ttf-dejavu xf86-video-fbdev \
+    xinit xterm \
+    awesome feh lxterminal \
+    fuse gvfs gvfs-mtp gvfs-lang gvfs-archive gvfs-fuse gvfs-gphoto2
 RUN [ "sh", "-c", "setup-xorg-base xf86-video-fbdev openbox slim dbus-x11 setxkbmap | tee "]
-RUN install_packages xinit xterm 
-RUN install_packages awesome feh lxterminal
-RUN install_packages fuse gvfs gvfs-mtp gvfs-lang gvfs-archive gvfs-fuse gvfs-gphoto2
-RUN rc-update add dbus
-RUN rc-update add fuse
+RUN sh -c "rc-update add dbus; rc-update add fuse"
 
-RUN install_packages tftp-hpa libx11-dev libxft-dev libxinerama-dev wireshark
+RUN install_packages tftp-hpa libx11-dev libxft-dev libxinerama-dev wireshark inetutils-syslogd
 
 # Set our working directory
 WORKDIR /root
 
-# This will copy all files in our root to the working  directory in the container
-RUN mkdir -p ~/.config/openbox
-COPY src/startup.sh ~/.config/openbox 
+# Make a space for the openbox config file
+RUN mkdir -p /root/.config/openbox
+COPY src/autostart.sh /root/.config/openbox 
+#RUN chmod +x /root/.config/openbox/autostart.sh
+
+RUN sh -c "mkdir /root/tftproot ; ls -l > /root/tftproot/dummy.txt"
 
 # Enable udevd so that plugged dynamic hardware devices show up in our container.
-ENV UDEV=1
+#ENV UDEV=1
 
 # Allow the TFTP port to be opened to the world
 EXPOSE 69/udp
 
 # Start an X session with the openbox window manager
 # openbox will invoke startup.sh which will start up the TFTP server
-CMD xinit openbox 
+# CMD xinit openbox 
+CMD startx /etc/X11/xinit/Xsession openbox-session
 
