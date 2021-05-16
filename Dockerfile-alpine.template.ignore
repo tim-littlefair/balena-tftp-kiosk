@@ -37,5 +37,5 @@ CMD sh -c "/usr/sbin/in.tftpd -L -c -s -p -vvv /root/tftproot &"
 # Openbox will invoke the file /root/.config/openbox/autostart.sh
 # which will bring up wireshark and a tail on the syslog where the 
 # in.tftpd is publishing its logging
-CMD startx /etc/X11/xinit/Xsession openbox-session ; sleep 300
+CMD startx ; sleep 300
 
