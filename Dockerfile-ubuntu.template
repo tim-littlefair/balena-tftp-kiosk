@@ -4,8 +4,7 @@ FROM balenalib/%%BALENA_MACHINE_NAME%%-ubuntu-python
 
 # RUN install_packages xserver-xorg-video-fbdev tftpd-hpa tftp-hpa wireshark dbus-x11 lxde openbox rxvt xterm sysvinit-utils
 RUN apt update
-RUN install_packages apt-utils
-RUN install_packages -y rsyslog rsyslog-doc tftpd-hpa tftp-hpa bmon iptraf tmux
+RUN install_packages -y rsyslog rsyslog-doc tftpd-hpa tftp-hpa bmon iptraf tmux fbset tcpdump kbd
 
 # Set our working directory
 WORKDIR /root
@@ -27,8 +26,13 @@ RUN sh -c "mkdir $TFTPD_DIR ; ls -l > $TFTPD_DIR/dummy.txt ; chown -R $TFTPD_USE
 # Apart from helping to understand what is going on, this seems to be 
 # necessary in order to prevent the server from exiting when the 
 # host's /dev unmounts.
-VOLUME /dev/log
-VOLUME /var/log
+# VOLUME /dev/log
+
+# Allow the container access to the frame buffer
+# VOLUME /dev
+
+# Allow the container access to the main log file on the host
+# VOLUME /var/log
 
 # Expose ports to allow TFTPD to do its job
 EXPOSE 69/udp 
@@ -37,6 +41,7 @@ EXPOSE 10690-10699/udp
 CMD  sh -c "\
     sleep 20 ; \
     systemctl start rsyslog ; \
+    openvt -s top ; \
     /usr/sbin/in.tftpd -v -v -L -c -s -p -R 10690:10699 $TFTPD_DIR  \
 "
 
