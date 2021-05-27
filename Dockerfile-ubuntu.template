@@ -10,7 +10,7 @@ RUN install_packages -y rsyslog rsyslog-doc tftpd-hpa tftp-hpa bmon iptraf tmux 
 # Set our working directory
 WORKDIR /root
 
-COPY src/60-custom-rsyslog.conf /etc/rsyslog.d
+COPY src/rsyslog.conf /etc/rsyslog.conf
 
 ENV TFTPD_DIR=/tftpboot
 #ENV TFTPD_USER=_tftpd_user
@@ -40,9 +40,9 @@ EXPOSE 69/udp
 EXPOSE 10690-10699/udp
 
 CMD  sh -c "\
-    sleep 20 ; \
-    systemctl start rsyslog ; \
-    openvt -s top ; \
+    touch /var/log/tftpd.log ; \
+    rsyslogd ; \
+    openvt -f -c 7 -s -- tail -F /var/log/tftpd.log ; \
     /usr/sbin/in.tftpd -v -v -L -c -s -p -R 10690:10699 $TFTPD_DIR  \
 "
 
