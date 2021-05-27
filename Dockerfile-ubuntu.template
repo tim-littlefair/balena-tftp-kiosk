@@ -5,7 +5,7 @@ FROM balenalib/%%BALENA_MACHINE_NAME%%-ubuntu-python
 # RUN install_packages xserver-xorg-video-fbdev tftpd-hpa tftp-hpa wireshark dbus-x11 lxde openbox rxvt xterm sysvinit-utils
 RUN apt update
 RUN install_packages -y systemd
-RUN install_packages -y rsyslog rsyslog-doc tftpd-hpa tftp-hpa bmon iptraf tmux fbset tcpdump kbd
+RUN install_packages -y rsyslog rsyslog-doc tftpd-hpa tftp-hpa bmon iptraf tmux fbset tcpdump kbd unzip
 
 # Set our working directory
 WORKDIR /root
@@ -17,6 +17,17 @@ ENV TFTPD_DIR=/tftpboot
 #RUN useradd $TFTPD_USER
 ENV TFTPD_USER=root
 RUN sh -c "mkdir $TFTPD_DIR ; ls -l > $TFTPD_DIR/dummy.txt ; chown -R $TFTPD_USER $TFTPD_DIR"
+COPY src/*.zip /tftpboot
+RUN sh -c "\
+    cd $TFTPD_DIR ; \
+    for d in *.zip ; \
+    do \
+        mkdir \$(basename \$d .zip) ; \
+        cd \$(basename \$d .zip) ; \
+        unzip ../\$d ; \
+        pwd ; ls ; cd .. ; \
+    done \
+"
 
 # Enable udevd so that plugged dynamic hardware devices show up in our container.
 #ENV UDEV=1
