@@ -26,7 +26,10 @@ RUN sh -c "\
         cd \$(basename \$d .zip) ; \
         unzip ../\$d ; \
         pwd ; ls ; cd .. ; \
-    done \
+    done ; \
+    mkdir default ; \
+    touch default/file-list.txt ; \
+    ls */* > default/file-list.txt \
 "
 
 # Enable udevd so that plugged dynamic hardware devices show up in our container.
@@ -56,8 +59,10 @@ CMD  sh -c "\
     touch /var/log/tftpd.log ; \
     rsyslogd ; \
     openvt -f -c 7 -s -w -- printf "\\\\033[2J\\\\033[H" ; \
-    openvt -f -c 7 -w -- echo Serving files from  $TFTPD_DIR/\$TFTPD_SUBDIR ; \
-    openvt -f -c 7 -- tail -F /var/log/tftpd.log ; \
+    openvt -f -c 7 -s -w -- echo Available files: ; \
+    openvt -f -c 7 -s -w -- cat $TFTPD_DIR/default/file-list.txt ; \
+    openvt -f -c 7 -s -w -- echo Serving files from  $TFTPD_DIR/\$TFTPD_SUBDIR ; \
+    openvt -f -c 7 -s -- tail -F /var/log/tftpd.log ; \
     /usr/sbin/in.tftpd -v -v -L -c -s -p -R 10690:10699 $TFTPD_DIR/\$TFTPD_SUBDIR  \
 "
 
