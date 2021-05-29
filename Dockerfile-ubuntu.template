@@ -50,11 +50,15 @@ RUN sh -c "\
 EXPOSE 69/udp 
 EXPOSE 10690-10699/udp
 
+#    openvt -f -c 7 -w -- sh -c 'env | sort' ; \
 CMD  sh -c "\
+    if [ -z "$TFTPD_SUBDIR" ] ; then TFTPD_SUBDIR=default ; fi ; export TFTPD_SUBDIR ; \
     touch /var/log/tftpd.log ; \
     rsyslogd ; \
-    openvt -f -c 7 -s -- tail -F /var/log/tftpd.log ; \
-    /usr/sbin/in.tftpd -v -v -L -c -s -p -R 10690:10699 $TFTPD_DIR  \
+    openvt -f -c 7 -s -w -- printf "\\\\033[2J\\\\033[H" ; \
+    openvt -f -c 7 -w -- echo Serving files from  $TFTPD_DIR/\$TFTPD_SUBDIR ; \
+    openvt -f -c 7 -- tail -F /var/log/tftpd.log ; \
+    /usr/sbin/in.tftpd -v -v -L -c -s -p -R 10690:10699 $TFTPD_DIR/\$TFTPD_SUBDIR  \
 "
 
 
