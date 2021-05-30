@@ -1,6 +1,12 @@
 ## balena-tftp-kiosk
-
 A simple TFTP appliance designed for remote management using the Balena framework.
+
+### Why to use this
+This project offers a method of configuring a TFTPD server as an appliance
+on a device which is supported by Balena and has ubuntu base images.
+To date it has been tested on Raspberry Pi 3 and 4.
+
+The server can hold multiple sets of files to serve over TFTP and can be switched between sets remotely using Balena's web console.
 
 ### How to use this
 1. Sign up for an account at balena.io install the balena CLI tool and read the balena documentation.
@@ -13,7 +19,7 @@ balena login
 ```
 then
 ```
-balena push joans-tftp-kiosk
+balena push --dockerfile Dockerfile-ubuntu.template joans-tftp-kiosk
 ```
 6. Follow the Balena documentation to create an SD card which can be put into a RPi or other compatible device to serve the files in the zip file.
 7. Any .zip file in the 'payloads' directory will be copied into the kiosk and will be available for serving, but if files are to be served from a zip file other than one called 'default.zip', the Balena web console must be used to set the variable TFTDP_SUBDIR to the basename of the .zip file.
