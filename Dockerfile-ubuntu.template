@@ -3,11 +3,17 @@
 FROM balenalib/%%BALENA_MACHINE_NAME%%-ubuntu-python
 
 RUN apt update
-RUN install_packages -y systemd
+#RUN install_packages -y systemd
 RUN install_packages -y rsyslog rsyslog-doc tftpd-hpa tftp-hpa bmon iptraf tmux fbset tcpdump kbd unzip
 
 # Set our working directory
 WORKDIR /root
+
+# Set the hostname and add an entry into /etc/hosts that 
+# enables the resolver to determine the host's FQDN
+# RUN hostname tftp-kiosk
+RUN echo $(hostname) > /etc/hostname
+RUN echo 127.0.1.1 $(hostname).local >> /etc/hosts
 
 COPY config/rsyslog.conf /etc/rsyslog.conf
 
@@ -21,11 +27,8 @@ RUN sh -c "\
         mkdir \$(basename \$d .zip) ; \
         cd \$(basename \$d .zip) ; \
         unzip ../\$d ; \
-        pwd ; ls ; cd .. ; \
-    done ; \
-    mkdir default ; \
-    touch default/file-list.txt ; \
-    ls */* > default/file-list.txt \
+        lastdir=$(pwd) ; ls ; cd .. ; \
+    done \
 "
 ENV TFTPD_USER=_tftpd_user
 RUN useradd $TFTPD_USER
@@ -36,14 +39,14 @@ EXPOSE 69/udp
 EXPOSE 10690-10699/udp
 
 CMD  sh -c "\
-    if [ -z "$TFTPD_SUBDIR" ] ; then TFTPD_SUBDIR=default ; fi ; export TFTPD_SUBDIR ; \
+    if [ -z "$TFTPD_SUBDIR" ] ; then TFTPD_SUBDIR=$(ls -1 $TFTPD_DIR | head -1) ; fi ; export TFTPD_SUBDIR ; \
     export TFTPD_USER ; \
     touch /var/log/tftpd.log ; \
     rsyslogd ; \
     openvt -f -c 7 -s -w -- printf "\\\\033[2J\\\\033[H" ; \
-    openvt -f -c 7 -s -w -- echo Available files: ; \
-    openvt -f -c 7 -s -w -- cat $TFTPD_DIR/default/file-list.txt ; \
     openvt -f -c 7 -s -w -- echo Serving files from  $TFTPD_DIR/\$TFTPD_SUBDIR ; \
+    openvt -f -c 7 -s -w -- echo Available files: ; \
+    openvt -f -c 7 -s -w -- ls $TFTPD_DIR/\$TFTPD_SUBDIR ; \
     openvt -f -c 7 -s -- tail -F /var/log/tftpd.log ; \
     /usr/sbin/in.tftpd -u $TFTPD_USER -v -v -L -c -s -p -R 10690:10699 $TFTPD_DIR/\$TFTPD_SUBDIR  \
 "
