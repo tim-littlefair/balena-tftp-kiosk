@@ -3,7 +3,8 @@
 FROM balenalib/%%BALENA_MACHINE_NAME%%-ubuntu-python
 
 RUN apt update
-RUN install_packages -y rsyslog rsyslog-doc tftpd-hpa tftp-hpa bmon iptraf tmux fbset tcpdump kbd unzip minicom nvi
+RUN install_packages -y rsyslog rsyslog-doc tftpd-hpa tftp-hpa \
+    bmon iptraf tmux fbset tcpdump kbd unzip minicom nvi screen
 RUN pip install --upgrade pip pyserial
 
 # Set our working directory
@@ -46,17 +47,17 @@ ENV UDEV=1
 COPY scripts/sample.minicom-script .
 COPY config/minirc.dfl /etc/minicom
 
+# Copy in the config file for the GNU screen program and the 
+# script it invokes
+COPY config/kiosk.screenrc ./.screenrc
+COPY scripts/view_syslog.sh .
+COPY scripts/run_minicom.sh .
+
 CMD  sh -c "\
-    if [ -z "$TFTPD_SUBDIR" ] ; then TFTPD_SUBDIR=$(ls -1 $TFTPD_DIR | head -1) ; fi ; export TFTPD_SUBDIR ; \
-    export TFTPD_USER ; \
-    touch /var/log/tftpd.log ; \
-    rsyslogd ; \
-    openvt -f -c 7 -s -w -- printf "\\\\033[2J\\\\033[H" ; \
-    openvt -f -c 7 -s -w -- echo Serving files from  $TFTPD_DIR/\$TFTPD_SUBDIR ; \
-    openvt -f -c 7 -s -w -- echo Available files: ; \
-    openvt -f -c 7 -s -w -- ls $TFTPD_DIR/\$TFTPD_SUBDIR ; \
-    openvt -f -c 7 -s -- tail -F /var/log/tftpd.log ; \
-    /usr/sbin/in.tftpd -u $TFTPD_USER -v -v -L -c -s -p -R 10690:10699 $TFTPD_DIR/\$TFTPD_SUBDIR  \
+    echo Before screen ; \
+    openvt -f -c 7 -s -w -- screen ; \
+    echo After screen ; \
+    sleep 60 \
 "
 
 
