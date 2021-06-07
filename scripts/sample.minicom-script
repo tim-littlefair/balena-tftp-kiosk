@@ -24,9 +24,9 @@ breakIntoUBoot:
     verbose on
     send "$(UBOOT_COMMAND)"
     expect {
-        "login:" !killall minicom
-        "U Boot" !killall minicom
-        timeout 300 !killall minicom
+        "login:" "!killall minicom"
+        "U Boot" "!killall minicom""
+        timeout 300 "!killall minicom"
     }
 return
 
