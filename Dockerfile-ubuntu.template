@@ -3,8 +3,8 @@
 FROM balenalib/%%BALENA_MACHINE_NAME%%-ubuntu-python
 
 RUN apt update
-#RUN install_packages -y systemd
-RUN install_packages -y rsyslog rsyslog-doc tftpd-hpa tftp-hpa bmon iptraf tmux fbset tcpdump kbd unzip
+RUN install_packages -y rsyslog rsyslog-doc tftpd-hpa tftp-hpa bmon iptraf tmux fbset tcpdump kbd unzip minicom nvi
+RUN pip install --upgrade pip pyserial
 
 # Set our working directory
 WORKDIR /root
@@ -37,6 +37,14 @@ RUN chown -R $TFTPD_USER.$TFTPD_USER $TFTPD_DIR
 # Expose ports to allow TFTPD to do its job
 EXPOSE 69/udp 
 EXPOSE 10690-10699/udp
+
+# Expose hotplug devices including USB/Serial to containers
+ENV UDEV=1
+
+# Set up the script which triggers TFTP reflash and the config required
+# to support it
+COPY scripts/sample.minicom-script .
+COPY config/minirc.dfl /etc/minicom
 
 CMD  sh -c "\
     if [ -z "$TFTPD_SUBDIR" ] ; then TFTPD_SUBDIR=$(ls -1 $TFTPD_DIR | head -1) ; fi ; export TFTPD_SUBDIR ; \

@@ -1,0 +1,20 @@
+verbose on
+set i 5
+breakIntoUBoot:
+send ""
+sleep 1
+dec i
+if i > 0 goto breakIntoUBoot
+send "run msp"
+expect {
+    "Hit any key to stop autoboot" goto breakIntoUBoot
+    timeout 600
+}
+waitForNextDevice:
+print Waiting for next device
+expect {
+    "Hit any key to stop autoboot" goto breakIntoUBoot
+    timeout 60
+}
+goto waitForNextDevice
+
