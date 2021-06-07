@@ -9,8 +9,9 @@ export TFTPD_USER
 
 /usr/sbin/in.tftpd -u $TFTPD_USER -v -v -l -c -s -p -R 10690:10699 $TFTPD_DIR/$TFTPD_SUBDIR
 touch /var/log/tftpd.log 
-rsyslogd 
-# printf "\\\\033[2J\\\\033[H" 
+rsyslogd 2> /dev/null
+echo Available directories
+find $TFTPD_DIR/* -type d -print | sort
 echo Serving files from  $TFTPD_DIR/$TFTPD_SUBDIR
 echo Available files:
 ls $TFTPD_DIR/$TFTPD_SUBDIR 

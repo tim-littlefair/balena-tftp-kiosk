@@ -2,7 +2,7 @@ startup_message off
 
 split
 split
-screen -t syslog 1 sh ./view_syslog.sh
+screen -t tftpd 1 sh ./view_syslog.sh
 focus
 screen -t minicom 2 sh ./run_minicom.sh
 focus

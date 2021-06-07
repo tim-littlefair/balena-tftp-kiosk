@@ -1,4 +1,4 @@
-timeout 144000
+timeout 3600
 start:
 gosub breakIntoUBoot
 sleep 20
@@ -9,8 +9,8 @@ breakIntoUBoot:
     print ""
     print "TFTP-KIOSK> Reboot device in next 10 seconds"
     waitForUBootPrompt:
+    send ".\c"
     verbose on
-    send ""
     expect {
         "U-Boot >" goto runUBootCommand
         timeout 1 break
@@ -26,7 +26,7 @@ breakIntoUBoot:
     expect {
         "login:" !killall minicom
         "U Boot" !killall minicom
-        timeout 300 break
+        timeout 300 !killall minicom
     }
 return
 
