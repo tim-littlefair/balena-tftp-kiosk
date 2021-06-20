@@ -1,9 +1,11 @@
 startup_message off
 
 split
-split
-screen -t tftpd 1 sh ./view_syslog.sh
+screen -t "sh/console messages" 1 sh
 focus
-screen -t minicom 2 sh ./run_minicom.sh
+split
+screen -t tftpd 2 sh ./view_syslog.sh
+focus
+screen -t minicom 3 sh ./run_minicom.sh
 focus
 

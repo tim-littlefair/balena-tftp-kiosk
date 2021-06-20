@@ -49,6 +49,7 @@ COPY config/minirc.dfl /etc/minicom
 
 # Copy in the config file for the GNU screen program and the 
 # script it invokes
+COPY scripts/add_static_address.sh .
 COPY config/kiosk.screenrc ./.screenrc
 COPY scripts/view_syslog.sh .
 COPY scripts/run_minicom.sh .
