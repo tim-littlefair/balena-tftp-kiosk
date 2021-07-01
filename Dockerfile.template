@@ -20,7 +20,7 @@ COPY config/rsyslog.conf /etc/rsyslog.conf
 
 ENV TFTPD_DIR=/tftpboot
 RUN sh -c "mkdir $TFTPD_DIR"
-COPY payloads/*.zip /tftpboot
+COPY payloads/*.zip /tftpboot/
 RUN sh -c "\
     cd $TFTPD_DIR ; \
     for d in *.zip ; \
